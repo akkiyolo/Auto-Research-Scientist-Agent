@@ -3,10 +3,12 @@
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FYOUR_USERNAME%2FYOUR_REPO_NAME)
 [![Powered by Gemini](https://img.shields.io/badge/Powered%20by-Gemini-blueviolet.svg)](https://deepmind.google/technologies/gemini/)
 
+
+
 An AI-powered agent that automates the scientific research process. It takes a research topic, finds and analyzes relevant academic papers, generates a comparative summary, and creates a baseline Jupyter notebook to kickstart experimentation.
 
- 
-*(Replace this with a screenshot of your own deployed application)*
+ <img width="1294" height="792" alt="image" src="https://github.com/user-attachments/assets/3b983ae2-fe39-4f31-8b58-8bc9bbe5e087" />
+
 
 ---
 
