@@ -35,7 +35,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
             <tr key={rowIndex} className="border-b border-gray-700 hover:bg-gray-800/40">
               {headers.map((header) => (
                 <td key={`${rowIndex}-${header}`} className="py-4 px-6">
-                  {row[header]}
+                  {row[header as keyof ComparisonMetric]}
                 </td>
               ))}
             </tr>

@@ -6,26 +6,6 @@
  */
 import { GoogleGenAI, Type } from "@google/genai";
 
-// Helper function to extract a JSON object from a string that might contain other text
-function extractJson(text: string): any {
-  const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```|({[\s\S]*})/);
-  if (!jsonMatch) {
-    throw new Error("No valid JSON object found in the model's response.");
-  }
-  // Use the first captured group that is not null. It could be the one inside markdown or the object itself.
-  const jsonString = jsonMatch[1] || jsonMatch[2];
-  if (!jsonString) {
-      throw new Error("Could not extract JSON from the model's response.");
-  }
-  try {
-    return JSON.parse(jsonString);
-  } catch (e) {
-    console.error("Final JSON parsing failed for string:", jsonString);
-    throw new Error("The model returned a malformed JSON response, please try again.");
-  }
-}
-
-
 // A serverless function handler (e.g., for Vercel, Netlify).
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -93,8 +73,9 @@ export default async function handler(req: any, res: any) {
       },
     });
     
-    const jsonText = response.text;
-    const result = extractJson(jsonText);
+    // With responseSchema, the API guarantees a valid JSON string.
+    // A direct parse is the correct and most robust method.
+    const result = JSON.parse(response.text);
 
     res.status(200).json(result);
 
