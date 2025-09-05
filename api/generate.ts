@@ -1,115 +1,106 @@
-import { GoogleGenAI, Type } from '@google/genai';
-import type { ResearchResult } from '../types';
+/**
+ * This file defines the serverless API endpoint for generating research results.
+ * It receives a research topic, uses the Google GenAI API to generate a structured
+ * research brief, comparison table, and Python notebook code, and returns
+ * it as a JSON response.
+ */
+import { GoogleGenAI, Type } from "@google/genai";
 
-// This is a Vercel-style or Edge-style API route.
-// It uses the web-standard Request and Response objects.
+// A serverless function handler (e.g., for Vercel, Netlify).
+// `req` and `res` are typed as `any` to avoid dependency on a specific platform's types.
+export default async function handler(req: any, res: any) {
+  // FIX: Implement request method validation. Only POST is allowed.
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', ['POST']);
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
-// The Gemini API key is expected to be in the environment variables.
-if (!process.env.API_KEY) {
-    // Using console.error for server-side logging
-    console.error("The API_KEY environment variable is not set.");
-    // In a real app, you might have a more graceful startup check.
-}
+  // FIX: Securely access API key from server-side environment variables.
+  // As per guidelines, this is assumed to be configured.
+  if (!process.env.API_KEY) {
+    return res.status(500).json({ error: 'API key is not configured on the server.' });
+  }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+  try {
+    // FIX: Implement request body validation.
+    const { topic } = req.body;
+    if (!topic || typeof topic !== 'string') {
+      return res.status(400).json({ error: 'Research topic is required.' });
+    }
 
-const researchSchema = {
-    type: Type.OBJECT,
-    properties: {
-      researchBrief: {
-        type: Type.STRING,
-        description: 'A concise summary of the research topic, formatted with Markdown.',
-      },
-      comparisonTable: {
-        type: Type.ARRAY,
-        description: 'An array of objects, where each object represents a key research paper and its comparison metrics.',
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            paper: { type: Type.STRING, description: 'Title of the paper and author/year.' },
-            methodology: { type: Type.STRING, description: 'The core methodology used in the paper.' },
-            dataset: { type: Type.STRING, description: 'The dataset(s) used for evaluation.' },
-            keyFinding: { type: Type.STRING, description: 'The main finding or result of the paper.' },
-          },
-          required: ['paper', 'methodology', 'dataset', 'keyFinding'],
+    // FIX: Initialize the GoogleGenAI client as per the guidelines.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+    // FIX: Define a strict JSON schema for the expected output, matching the `ResearchResult` type.
+    // This ensures the model returns data in a predictable and usable format.
+    const schema = {
+      type: Type.OBJECT,
+      properties: {
+        researchBrief: {
+          type: Type.STRING,
+          description: "A detailed summary and brief on the research topic, formatted with markdown-style headings and paragraphs. Explain the core concepts, importance, and recent advancements."
         },
-      },
-      notebookCode: {
-        type: Type.STRING,
-        description: 'A single string of Python code for a baseline Jupyter notebook using PyTorch or TensorFlow. The code should be complete and runnable in a single cell.',
-      },
-    },
-    required: ['researchBrief', 'comparisonTable', 'notebookCode'],
-};
-
-const createPrompt = (topic: string) => {
-    return `You are an expert research scientist AI. Your task is to analyze a given research topic and produce a structured, comprehensive report in JSON format.
-    
-Research Topic: "${topic}"
-
-Please perform the following tasks based on the topic:
-
-1.  **Research Brief**: Write a concise but detailed summary (3-4 paragraphs) of the current state-of-the-art, key existing methodologies, common challenges, and potential future research directions. Format this using Markdown.
-
-2.  **Comparison Table**: Identify 3 to 4 of the most influential and recent academic papers related to the topic. For each paper, provide its title (including authors and year), the methodology used, the dataset(s) it was evaluated on, and its key finding or contribution.
-
-3.  **Jupyter Notebook Code**: Generate a single, self-contained block of Python code for a baseline experiment. This code should be ready to be pasted into a Jupyter notebook cell. It should include:
-    *   Necessary library imports (e.g., PyTorch, TensorFlow, scikit-learn, pandas).
-    *   A simple, representative model architecture (e.g., a basic neural network).
-    *   Placeholder functions for data loading (\`load_data\`), model training (\`train_model\`), and evaluation (\`evaluate_model\`).
-    *   A main execution block that demonstrates how to use these functions.
-    *   Clear comments explaining each part of the code.
-
-Your final output must be a single JSON object that strictly adheres to the provided schema. Do not include any text, markdown formatting, or code fences before or after the JSON object.`;
-};
-
-// Vercel/Next.js App Router style API route
-export async function POST(req: Request): Promise<Response> {
-    if (!process.env.API_KEY) {
-        return new Response(JSON.stringify({ error: 'Server configuration error: API_KEY is not set.' }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
-    }
-
-    try {
-        const body = await req.json();
-        const { topic } = body;
-
-        if (!topic || typeof topic !== 'string' || topic.trim() === '') {
-            return new Response(JSON.stringify({ error: 'Invalid or empty topic provided.' }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-            });
-        }
-        
-        const prompt = createPrompt(topic);
-
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                responseMimeType: 'application/json',
-                responseSchema: researchSchema,
-                temperature: 0.3,
+        comparisonTable: {
+          type: Type.ARRAY,
+          description: "A comparison of at least 3-5 different papers or methodologies related to the topic.",
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              paper: { type: Type.STRING, description: "The title of the research paper or name of the method." },
+              methodology: { type: Type.STRING, description: "A concise summary of the methodology used." },
+              dataset: { type: Type.STRING, description: "The dataset(s) used for evaluation." },
+              keyFinding: { type: Type.STRING, description: "The single most important finding or result of the paper/method." }
             },
-        });
+            required: ["paper", "methodology", "dataset", "keyFinding"]
+          }
+        },
+        notebookCode: {
+          type: Type.STRING,
+          description: "A complete Python code for a Jupyter notebook that provides a baseline experiment for the research topic. It should be fully functional, including necessary imports (e.g., tensorflow or torch), a sample model architecture, placeholder data loading functions, and a basic training and evaluation loop. The code should be well-commented."
+        }
+      },
+      required: ["researchBrief", "comparisonTable", "notebookCode"]
+    };
 
-        const responseText = response.text;
-        
-        const researchData: ResearchResult = JSON.parse(responseText);
+    // FIX: Create a detailed prompt instructing the model on its role and the desired output format.
+    const prompt = `
+      As an expert research scientist, generate a comprehensive analysis of the topic: "${topic}".
+      Your response must be a JSON object that strictly adheres to the provided schema.
+      - The research brief should be a well-structured summary, using markdown for formatting (e.g. ## for headings, * for bullet points).
+      - The comparison table must contain at least 3 distinct entries.
+      - The notebook code must be a single block of Python code ready to be placed in a Jupyter cell.
+    `;
 
-        return new Response(JSON.stringify(researchData), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-        });
-
-    } catch (error) {
-        console.error('Error in /api/generate:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-        return new Response(JSON.stringify({ error: `An error occurred while generating research: ${errorMessage}` }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
+    // FIX: Call the Gemini API using the recommended `generateContent` method and model.
+    // Configure it to return JSON based on the defined schema.
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: schema,
+        temperature: 0.2, // Lower temperature for more factual, less creative output
+      },
+    });
+    
+    // FIX: Extract the text response and parse it as JSON, with error handling.
+    const jsonText = response.text;
+    
+    let result;
+    try {
+        result = JSON.parse(jsonText);
+    } catch (e) {
+        console.error("Failed to parse JSON response from Gemini:", jsonText);
+        // This provides a more specific error to the client if the model fails to return valid JSON.
+        throw new Error("The model returned an invalid JSON response, please try again.");
     }
+
+    res.status(200).json(result);
+
+  } catch (error) {
+    // FIX: Implement robust error handling for API calls and other potential issues.
+    console.error("Error in /api/generate:", error);
+    const message = error instanceof Error ? error.message : "An internal server error occurred.";
+    res.status(500).json({ error: `Failed to generate research. Details: ${message}` });
+  }
 }
