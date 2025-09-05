@@ -1,20 +1,99 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Auto-Research Scientist Agent
 
-# Run and deploy your AI Studio app
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FYOUR_USERNAME%2FYOUR_REPO_NAME)
+[![Powered by Gemini](https://img.shields.io/badge/Powered%20by-Gemini-blueviolet.svg)](https://deepmind.google/technologies/gemini/)
 
-This contains everything you need to run your app locally.
+An AI-powered agent that automates the scientific research process. It takes a research topic, finds and analyzes relevant academic papers, generates a comparative summary, and creates a baseline Jupyter notebook to kickstart experimentation.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1fpZOqvkrda8n8uGESkTz9qm491CcTU5m
+ 
+*(Replace this with a screenshot of your own deployed application)*
 
-## Run Locally
+---
 
-**Prerequisites:**  Node.js
+## 🚀 Core Features
 
+-   **Automated Research Briefs:** Generates a detailed summary of any scientific topic, explaining core concepts, importance, and recent advancements.
+-   **Comparative Analysis:** Creates a side-by-side comparison table of different papers or methodologies, highlighting key findings, datasets, and techniques.
+-   **Code Generation:** Automatically writes a complete, well-commented Python baseline in a Jupyter Notebook format using PyTorch or TensorFlow to start experiments immediately.
+-   **Interactive UI:** A modern, responsive, and dark-mode interface with a tabbed view to easily switch between the brief, comparison table, and notebook code.
+-   **One-Click Deployment:** Ready to be deployed on Vercel with minimal configuration.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 🛠️ Tech Stack
+
+-   **Frontend:** [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/), [Vite](https://vitejs.dev/), [Tailwind CSS](https://tailwindcss.com/)
+-   **Backend:** [Vercel Serverless Functions](https://vercel.com/docs/functions)
+-   **AI Model:** [Google Gemini API (`gemini-2.5-flash`)](https://deepmind.google/technologies/gemini/)
+
+## ⚙️ Getting Started & Deployment
+
+This project is optimized for deployment on Vercel.
+
+### Prerequisites
+
+-   [Node.js](https://nodejs.org/) (v18 or later)
+-   [Vercel Account](https://vercel.com/signup)
+-   A **Google Gemini API Key**. You can get one from [Google AI Studio](https://aistudio.google.com/app/apikey).
+
+### 1. One-Click Vercel Deployment
+
+This is the easiest way to get your own version of the agent running.
+
+1.  **Fork this Repository** to your own GitHub account.
+2.  **Click the "Deploy with Vercel" button** at the top of this README.
+3.  **Configure the Environment Variable:**
+    -   During the Vercel import process, you will be prompted to add Environment Variables.
+    -   Create a new variable with the name `API_KEY`.
+    -   Paste your Google Gemini API key as the value.
+4.  **Deploy!** Vercel will handle the rest. Your agent will be live at the provided URL.
+
+### 2. Local Development (Optional)
+
+To run the application locally in an environment that mimics Vercel's production setup, you should use the Vercel CLI.
+
+1.  **Clone your forked repository:**
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+    cd YOUR_REPO_NAME
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Install the Vercel CLI:**
+    ```bash
+    npm i -g vercel
+    ```
+
+4.  **Link your project to Vercel:**
+    ```bash
+    vercel link
+    ```
+
+5.  **Pull environment variables:**
+    ```bash
+    vercel env pull .env.local
+    ```
+    This will create a `.env.local` file in your project with the `API_KEY` you set up in your Vercel project.
+
+6.  **Start the development server:**
+    ```bash
+    vercel dev
+    ```
+    This command starts a local server that runs your frontend and correctly routes `/api/generate` requests to your serverless function, just like in production. Your app will be available at `http://localhost:3000`.
+
+## 🤖 How It Works
+
+1.  **User Input:** The user enters a research topic on the frontend.
+2.  **API Request:** The React application sends a `POST` request to a secure backend serverless function located at `/api/generate`.
+3.  **Serverless Execution:** The Vercel function receives the topic. It securely accesses the `API_KEY` from its environment variables to initialize the Google GenAI client.
+4.  **AI Generation:** The function sends a detailed prompt and a strict JSON schema to the `gemini-2.5-flash` model.
+5.  **Structured Response:** The Gemini API processes the request and returns a structured JSON object containing the research brief, comparison table data, and Python notebook code.
+6.  **Display Results:** The serverless function sends the JSON data back to the frontend, which then dynamically renders the results in the interactive, tabbed UI.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
