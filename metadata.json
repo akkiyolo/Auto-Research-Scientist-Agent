@@ -1,0 +1,5 @@
+{
+  "name": "Auto-Research Scientist Agent",
+  "description": "An AI-powered agent that automates the research process. It takes a research topic, finds relevant academic papers using web search, generates a comparative summary, and creates a baseline Jupyter notebook to kickstart experimentation.",
+  "requestFramePermissions": []
+}
