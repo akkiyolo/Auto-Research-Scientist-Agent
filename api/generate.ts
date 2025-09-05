@@ -80,8 +80,16 @@ export default async function handler(req: any, res: any) {
     res.status(200).json(result);
 
   } catch (error) {
-    console.error("Error in /api/generate:", error);
-    const message = error instanceof Error ? error.message : "An internal server error occurred.";
+    // Log the full error to the Vercel console for better debugging
+    console.error("Detailed Error in /api/generate:", JSON.stringify(error, null, 2));
+    
+    let message = "An internal server error occurred.";
+    if (error instanceof Error) {
+        message = error.message;
+    } else if (typeof error === 'object' && error !== null && 'message' in error) {
+        message = String((error as { message: unknown }).message);
+    }
+    
     res.status(500).json({ error: message });
   }
 }
