@@ -6,6 +6,30 @@ import { Loader } from './components/Loader';
 import { generateResearch } from './services/geminiService';
 import { ChevronUpIcon } from './components/icons/ChevronUpIcon';
 
+// Helper function to parse complex error messages for better UI display
+const parseErrorMessage = (message: string): string => {
+  // Look for a JSON object within the error string, which often comes from API errors
+  const jsonMatch = message.match(/({.*})/s);
+  if (jsonMatch && jsonMatch[1]) {
+    try {
+      const errorObj = JSON.parse(jsonMatch[1]);
+      // Extract the most specific message available from the nested structure
+      if (errorObj?.error?.message) {
+        return errorObj.error.message;
+      }
+      if (errorObj?.message) {
+        return errorObj.message;
+      }
+    } catch (e) {
+      // If parsing fails, fall through to the generic cleanup
+    }
+  }
+
+  // If no JSON, or if parsing failed, return a cleaned-up version of the original string
+  const cleanMessage = message.split('{')[0].replace(/got status: \d+.*?\. /i, '').trim();
+  return cleanMessage || message;
+};
+
 const App: React.FC = () => {
   const [researchTopic, setResearchTopic] = useState<string>('');
   const [researchResult, setResearchResult] = useState<ResearchResult | null>(null);
@@ -26,7 +50,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleScrollTop = () => {
-    window.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleResearchSubmit = useCallback(async (topic: string) => {
@@ -42,8 +66,10 @@ const App: React.FC = () => {
       setResearchResult(result);
     } catch (err) {
       console.error('Error during research generation:', err);
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-      setError(`Failed to generate research. ${errorMessage}`);
+      const rawMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      // Use the helper to get a user-friendly message
+      const cleanMessage = parseErrorMessage(rawMessage);
+      setError(cleanMessage);
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +93,7 @@ const App: React.FC = () => {
           {isLoading && <Loader topic={researchTopic} />}
 
           {error && (
-            <div className="mt-8 p-4 bg-red-900/50 border border-red-700 rounded-lg text-red-300 text-center">
+            <div className="mt-8 p-4 bg-red-900/50 border border-red-700 rounded-lg text-red-300 text-center animate-fade-in">
               <p className="font-bold">An Error Occurred</p>
               <p className="mt-1 text-sm">{error}</p>
             </div>
