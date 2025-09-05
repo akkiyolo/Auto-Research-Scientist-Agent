@@ -3,7 +3,6 @@ export interface ComparisonMetric {
   methodology: string;
   dataset: string;
   keyFinding: string;
-  [key: string]: string;
 }
 
 export interface ResearchResult {
