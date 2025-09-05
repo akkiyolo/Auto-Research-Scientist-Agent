@@ -1,28 +1,24 @@
 import { GoogleGenAI, Type } from "@google/genai";
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// This is a Vercel Edge Function, compatible with various frontend frameworks.
-export const config = {
-  runtime: 'edge',
-};
-
-// The main handler for the API route
-export default async function handler(req: Request) {
+// The main handler for the API route, using the standard Vercel runtime
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Ensure this is a POST request
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // CRUCIAL: Check if the API key is configured on the server
+  if (!process.env.API_KEY) {
+    console.error("API_KEY environment variable not set.");
+    return res.status(500).json({ error: "API_KEY is not configured on the server. Please add it to your Vercel project's environment variables." });
   }
 
   try {
-    const { topic } = await req.json();
+    const { topic } = req.body;
 
     if (!topic || typeof topic !== 'string') {
-      return new Response(JSON.stringify({ error: 'Topic is required and must be a string' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(400).json({ error: 'Topic is required and must be a string' });
     }
 
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -120,17 +116,12 @@ Here are the detailed requirements for each field:
     }
 
     // Return the successful response
-    return new Response(JSON.stringify(researchData), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(200).json(researchData);
 
   } catch (error) {
     console.error("Error in /api/generate:", error);
-    const message = error instanceof Error ? error.message : "An unexpected error occurred.";
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    // Send back a specific error message instead of letting the function crash
+    const message = error instanceof Error ? error.message : "An unexpected server error occurred.";
+    return res.status(500).json({ error: message });
   }
 }
