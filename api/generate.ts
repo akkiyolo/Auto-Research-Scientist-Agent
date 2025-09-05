@@ -1,6 +1,16 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+// Helper function to extract a JSON string from a larger text block
+function extractJson(text: string): string | null {
+  const match = text.match(/```json\s*([\s\S]*?)\s*```|({[\s\S]*})/);
+  if (match) {
+    // Return the content of the json block, or the matched object itself
+    return match[1] || match[2];
+  }
+  return null;
+}
+
 // The main handler for the API route, using the standard Vercel runtime
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Ensure this is a POST request
@@ -43,7 +53,7 @@ Please generate a JSON object with the following structure:
 
 Here are the detailed requirements for each field:
 
-1.  **researchBrief**: A concise but comprehensive summary of the research topic. Explain the background, key challenges, and recent advancements. The output should be a single string with simple HTML formatting for paragraphs (<p>), lists (<ul>, <li>), and bold text (<strong>). Do not include <html> or <body> tags.
+1.  **researchBrief**: A concise but comprehensive summary of the research topic. Explain the background, key challenges, and recent advancements. The output should be a single string. Use newline characters (\n) for paragraph breaks. Do NOT use any HTML tags.
 
 2.  **paperKeys**: An array of 3 short, unique identifiers for the key papers you analyzed. Use the format "Paper 1", "Paper 2", "Paper 3". These keys MUST EXACTLY match the keys used in the comparisonTable objects.
 
@@ -58,7 +68,7 @@ Here are the detailed requirements for each field:
       properties: {
         researchBrief: {
           type: Type.STRING,
-          description: "A summary of the research topic with simple HTML formatting."
+          description: "A summary of the research topic with newline characters for formatting."
         },
         paperKeys: {
           type: Type.ARRAY,
@@ -74,6 +84,8 @@ Here are the detailed requirements for each field:
               aspect: { type: Type.STRING },
             },
             required: ['aspect'],
+            // Allow other properties (Paper 1, etc.)
+            additionalProperties: { type: Type.STRING }
           },
         },
         notebookCode: {
@@ -97,10 +109,15 @@ Here are the detailed requirements for each field:
     // Parse and validate the response
     let researchData;
     try {
-        const text = response.text.trim();
-        researchData = JSON.parse(text);
+        const rawText = response.text;
+        const jsonText = extractJson(rawText);
+        if (!jsonText) {
+          console.error("No valid JSON object found in Gemini response:", rawText);
+          throw new Error("The AI model returned an invalid data structure. Please try again.");
+        }
+        researchData = JSON.parse(jsonText);
     } catch (e) {
-        console.error("Failed to parse JSON from Gemini response:", response.text);
+        console.error("Failed to parse JSON from Gemini response:", response.text, e);
         throw new Error("The AI model returned an invalid data structure. Please try again.");
     }
 
