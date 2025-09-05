@@ -1,12 +1,13 @@
-
-export interface ComparisonRow {
-  aspect: string;
-  [paperKey: string]: string;
+export interface ComparisonMetric {
+  paper: string;
+  methodology: string;
+  dataset: string;
+  keyFinding: string;
+  [key: string]: string;
 }
 
 export interface ResearchResult {
   researchBrief: string;
-  comparisonTable: ComparisonRow[];
-  paperKeys: string[];
+  comparisonTable: ComparisonMetric[];
   notebookCode: string;
 }

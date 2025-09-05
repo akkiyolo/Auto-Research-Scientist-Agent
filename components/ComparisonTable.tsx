@@ -1,43 +1,41 @@
 import React from 'react';
-import type { ComparisonRow } from '../types';
+import type { ComparisonMetric } from '../types';
 
 interface ComparisonTableProps {
-  data: ComparisonRow[];
-  paperKeys: string[];
+  data: ComparisonMetric[];
 }
 
-export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data, paperKeys }) => {
+// Function to format header keys (e.g., "keyFinding" -> "Key Finding")
+const formatHeader = (key: string) => {
+  const result = key.replace(/([A-Z])/g, ' $1');
+  return result.charAt(0).toUpperCase() + result.slice(1);
+};
+
+export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
   if (!data || data.length === 0) {
     return <p className="text-gray-400">No comparison data available.</p>;
   }
 
-  const headerKeys = ['aspect', ...paperKeys];
+  const headers = Object.keys(data[0]);
 
   return (
-    <div className="overflow-x-auto border border-gray-700 rounded-lg">
-      <table className="min-w-full divide-y divide-gray-700">
-        <thead className="bg-gray-800/70">
+    <div className="overflow-x-auto relative shadow-md sm:rounded-lg border border-gray-700">
+      <table className="w-full text-sm text-left text-gray-300">
+        <thead className="text-xs text-gray-200 uppercase bg-gray-700/50">
           <tr>
-            {headerKeys.map((key, index) => (
-              <th
-                key={index}
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-semibold text-indigo-400 uppercase tracking-wider"
-              >
-                {key === 'aspect' ? 'Feature' : `Paper ${index}`}
+            {headers.map((header) => (
+              <th key={header} scope="col" className="py-3 px-6">
+                {formatHeader(header)}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="bg-gray-900/50 divide-y divide-gray-700">
+        <tbody>
           {data.map((row, rowIndex) => (
-            <tr key={rowIndex} className="hover:bg-gray-800/60 transition-colors duration-200">
-              {headerKeys.map((key, colIndex) => (
-                <td
-                  key={colIndex}
-                  className={`px-6 py-4 whitespace-pre-wrap text-sm transition-colors duration-200 ${colIndex === 0 ? 'font-semibold text-gray-200' : 'text-gray-400'}`}
-                >
-                  {row[key]}
+            <tr key={rowIndex} className="border-b border-gray-700 hover:bg-gray-800/40">
+              {headers.map((header) => (
+                <td key={`${rowIndex}-${header}`} className="py-4 px-6">
+                  {row[header]}
                 </td>
               ))}
             </tr>

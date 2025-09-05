@@ -66,7 +66,8 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, topic })
         {activeTab === 'table' && (
           <div>
             <h2 className="text-2xl font-bold mb-4 text-brand-purple font-display">Methodology Comparison</h2>
-            <ComparisonTable data={result.comparisonTable} paperKeys={result.paperKeys} />
+            {/* FIX: Removed paperKeys prop as it's no longer needed with the updated data structure. */}
+            <ComparisonTable data={result.comparisonTable} />
           </div>
         )}
 
