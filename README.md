@@ -87,7 +87,7 @@ The backend logic resides in an Appwrite Function defined in `appwrite.json`.
     -   In the function's **Settings** tab, find the **Execute Access** section.
     -   Add the `any` role. This allows your frontend application to call the function without requiring a logged-in user.
 
-### 4. Configure and Run the Frontend
+### 4. Configure and Run the Frontend (Locally)
 
 1.  **Create an environment file:** Create a new file named `.env.local` in the root of the project. Copy the contents of `.env.example` into it.
 
@@ -103,6 +103,20 @@ The backend logic resides in an Appwrite Function defined in `appwrite.json`.
     npm run dev
     ```
     Your application will be running at `http://localhost:5173` (or another port if 5173 is busy).
+
+### 5. Deploying the Frontend to Appwrite Hosting (The Fix)
+
+To get your application live on an `appwrite.network` domain like in your screenshot, you need to connect your GitHub repository to Appwrite Hosting and provide the correct build settings.
+
+1.  In your Appwrite project console, navigate to the **Hosting** tab.
+2.  Connect your GitHub account and select your forked repository.
+3.  When prompted for the **Build Settings**, use the following configuration:
+    -   **Root Directory:** Leave this blank or enter `/`.
+    -   **Build Command:** `npm install && npm run build`
+    -   **Output Directory:** `dist`
+4.  Save the settings and trigger a new deployment from the Deployments tab. Appwrite will now automatically build and deploy your frontend whenever you push changes to your repository.
+
+**Why is this needed?** The `appwrite.json` file configures backend resources like Functions. The Hosting settings, configured in the UI, tell Appwrite how to handle your frontend code—how to build it and which folder (`dist`) contains the final website to be served. Without these settings, Appwrite doesn't know how to prepare your Vite app, leading to a blank deployment.
 
 ## 🤖 How It Works
 
