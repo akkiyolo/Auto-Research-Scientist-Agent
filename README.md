@@ -1,14 +1,12 @@
-# Auto-Research Scientist Agent
+# Auto-Research Scientist Agent (Appwrite Edition)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FYOUR_USERNAME%2FYOUR_REPO_NAME)
+[![Deploy with Appwrite](https://appwrite.io/images/deploy.svg)](https://cloud.appwrite.io/new/project?template=https%3A%2F%2Fgithub.com%2FYOUR_USERNAME%2FYOUR_REPO_NAME)
 [![Powered by Gemini](https://img.shields.io/badge/Powered%20by-Gemini-blueviolet.svg)](https://deepmind.google/technologies/gemini/)
 
+An AI-powered agent that automates the scientific research process. It takes a research topic, analyzes relevant academic papers, generates a comparative summary, and creates a baseline Jupyter notebook to kickstart experimentation. This version is built to run on the Appwrite backend-as-a-service platform.
 
 
-An AI-powered agent that automates the scientific research process. It takes a research topic, finds and analyzes relevant academic papers, generates a comparative summary, and creates a baseline Jupyter notebook to kickstart experimentation.
-
- <img width="1294" height="792" alt="image" src="https://github.com/user-attachments/assets/3b983ae2-fe39-4f31-8b58-8bc9bbe5e087" />
-
+*(Replace this with a screenshot of your own deployed application)*
 
 ---
 
@@ -18,39 +16,33 @@ An AI-powered agent that automates the scientific research process. It takes a r
 -   **Comparative Analysis:** Creates a side-by-side comparison table of different papers or methodologies, highlighting key findings, datasets, and techniques.
 -   **Code Generation:** Automatically writes a complete, well-commented Python baseline in a Jupyter Notebook format using PyTorch or TensorFlow to start experiments immediately.
 -   **Interactive UI:** A modern, responsive, and dark-mode interface with a tabbed view to easily switch between the brief, comparison table, and notebook code.
--   **One-Click Deployment:** Ready to be deployed on Vercel with minimal configuration.
+-   **Appwrite Backend:** Powered by a secure and scalable Appwrite Function for backend logic.
 
 ## 🛠️ Tech Stack
 
 -   **Frontend:** [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/), [Vite](https://vitejs.dev/), [Tailwind CSS](https://tailwindcss.com/)
--   **Backend:** [Vercel Serverless Functions](https://vercel.com/docs/functions)
+-   **Backend:** [Appwrite Functions](https://appwrite.io/docs/functions)
 -   **AI Model:** [Google Gemini API (`gemini-2.5-flash`)](https://deepmind.google/technologies/gemini/)
 
 ## ⚙️ Getting Started & Deployment
 
-This project is optimized for deployment on Vercel.
+This project is configured for deployment on [Appwrite](https://appwrite.io/), either self-hosted with Docker or on Appwrite Cloud.
 
 ### Prerequisites
 
 -   [Node.js](https://nodejs.org/) (v18 or later)
--   [Vercel Account](https://vercel.com/signup)
+-   [Appwrite CLI](https://appwrite.io/docs/command-line)
+-   [Docker](https://www.docker.com/) (for local Appwrite instance)
+-   An **Appwrite Project**
 -   A **Google Gemini API Key**. You can get one from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
-### 1. One-Click Vercel Deployment
+### 1. Set Up Your Appwrite Project
 
-This is the easiest way to get your own version of the agent running.
+You can either [run Appwrite locally](https://appwrite.io/docs/self-hosting) with Docker or use [Appwrite Cloud](https://cloud.appwrite.io/).
 
-1.  **Fork this Repository** to your own GitHub account.
-2.  **Click the "Deploy with Vercel" button** at the top of this README.
-3.  **Configure the Environment Variable:**
-    -   During the Vercel import process, you will be prompted to add Environment Variables.
-    -   Create a new variable with the name `API_KEY`.
-    -   Paste your Google Gemini API key as the value.
-4.  **Deploy!** Vercel will handle the rest. Your agent will be live at the provided URL.
+Once your Appwrite instance is running, create a new project.
 
-### 2. Local Development (Optional)
-
-To run the application locally in an environment that mimics Vercel's production setup, you should use the Vercel CLI.
+### 2. Configure the Project Locally
 
 1.  **Clone your forked repository:**
     ```bash
@@ -58,44 +50,71 @@ To run the application locally in an environment that mimics Vercel's production
     cd YOUR_REPO_NAME
     ```
 
-2.  **Install dependencies:**
+2.  **Install frontend dependencies:**
     ```bash
     npm install
     ```
 
-3.  **Install the Vercel CLI:**
+3.  **Log in to Appwrite CLI:**
     ```bash
-    npm i -g vercel
+    appwrite login
+    ```
+    Follow the prompts, using the endpoint for your Appwrite instance (e.g., `http://localhost/v1` for local, `https://cloud.appwrite.io/v1` for cloud).
+
+4.  **Link your project:**
+    ```bash
+    appwrite init project
+    ```
+    Choose to link to an existing Appwrite project and select the one you created. This will update the `appwrite.json` file with your project ID.
+
+### 3. Deploy the Appwrite Function
+
+The backend logic resides in an Appwrite Function defined in `appwrite.json`.
+
+1.  **Deploy the function:**
+    ```bash
+    appwrite deploy function --all --yes
+    ```
+    This command reads the `appwrite.json` file, builds the function code in `/functions/generate-research`, and deploys it to your Appwrite project.
+
+2.  **Add your Gemini API Key:**
+    -   Navigate to your project in the Appwrite Console.
+    -   Go to **Functions** and select the `generate-research` function.
+    -   Go to the **Settings** tab.
+    -   Scroll down to **Variables**. Add a variable with the key `API_KEY` and paste your Google Gemini API Key as the value.
+
+3.  **Set Function Permissions:**
+    -   In the function's **Settings** tab, find the **Execute Access** section.
+    -   Add the `any` role. This allows your frontend application to call the function without requiring a logged-in user.
+
+### 4. Configure and Run the Frontend
+
+1.  **Create an environment file:** Create a new file named `.env.local` in the root of the project. Copy the contents of `.env.example` into it.
+
+2.  **Set environment variables:** In `.env.local`, update the values with your Appwrite project details. You can find these in your Appwrite project's **Settings** page.
+    ```
+    VITE_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+    VITE_APPWRITE_PROJECT_ID=YOUR_PROJECT_ID
+    VITE_APPWRITE_FUNCTION_ID=generate-research
     ```
 
-4.  **Link your project to Vercel:**
+3.  **Start the development server:**
     ```bash
-    vercel link
+    npm run dev
     ```
-
-5.  **Pull environment variables:**
-    ```bash
-    vercel env pull .env.local
-    ```
-    This will create a `.env.local` file in your project with the `API_KEY` you set up in your Vercel project.
-
-6.  **Start the development server:**
-    ```bash
-    vercel dev
-    ```
-    This command starts a local server that runs your frontend and correctly routes `/api/generate` requests to your serverless function, just like in production. Your app will be available at `http://localhost:3000`.
+    Your application will be running at `http://localhost:5173` (or another port if 5173 is busy).
 
 ## 🤖 How It Works
 
-1.  **User Input:** The user enters a research topic on the frontend.
-2.  **API Request:** The React application sends a `POST` request to a secure backend serverless function located at `/api/generate`.
-3.  **Serverless Execution:** The Vercel function receives the topic. It securely accesses the `API_KEY` from its environment variables to initialize the Google GenAI client.
+1.  **User Input:** The user enters a research topic on the React frontend.
+2.  **Appwrite SDK Call:** The React application uses the Appwrite SDK to call the `generate-research` function.
+3.  **Appwrite Function Execution:** Appwrite securely executes the function, providing it with the `API_KEY` environment variable.
 4.  **AI Generation:** The function sends a detailed prompt and a strict JSON schema to the `gemini-2.5-flash` model.
-5.  **Structured Response:** The Gemini API processes the request and returns a structured JSON object containing the research brief, comparison table data, and Python notebook code.
-6.  **Display Results:** The serverless function sends the JSON data back to the frontend, which then dynamically renders the results in the interactive, tabbed UI.
+5.  **Structured Response:** The Gemini API returns a structured JSON object containing the research brief, comparison table data, and Python notebook code.
+6.  **Display Results:** The Appwrite Function sends the JSON data back to the frontend, which then dynamically renders the results in the interactive UI.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.

@@ -1,0 +1,29 @@
+{
+    "projectId": "autoResearchAgent",
+    "projectName": "Auto Research Agent",
+    "functions": [
+        {
+            "$id": "generate-research",
+            "name": "generate-research",
+            "runtime": "node-18.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 60,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "dist/index.js",
+            "commands": "npm install && npm run build",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "variables": {
+                "API_KEY": ""
+            },
+            "path": "functions/generate-research"
+        }
+    ]
+}

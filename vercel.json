@@ -1,7 +1,3 @@
 {
-  "functions": {
-    "api/generate.ts": {
-      "maxDuration": 30
-    }
-  }
+  "//": "This project has been migrated to Appwrite. This file is no longer in use."
 }
